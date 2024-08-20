@@ -11,6 +11,10 @@ def index(request):
     if request.method == 'GET':
         vacancies = Vacancy.objects.all()
 
+        search_text = request.GET.get('text', None)
+        if search_text:
+            vacancies = vacancies.filter(text=search_text)
+
         response = []
         for vacancy in vacancies:
             response.append({
@@ -19,3 +23,16 @@ def index(request):
             })
 
     return JsonResponse(response, safe=False)
+
+
+def get(request, vacancy_id):
+    if request.method == 'GET':
+        try:
+            vacancy = Vacancy.objects.get(pk=vacancy_id)
+        except Vacancy.DoesNotExist:
+            return JsonResponse({'error': 'Vacancy not found'}, status=404)
+
+        return JsonResponse({
+            'id': vacancy.id,
+            'text': vacancy.text
+        })
